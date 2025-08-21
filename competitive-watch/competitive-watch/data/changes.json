@@ -1,0 +1,10 @@
+[
+  {
+    "ts": 1755804537,
+    "competitor": "Init",
+    "url": "https://example.com",
+    "field": "setup",
+    "old": "",
+    "new": "Repository initialized."
+  }
+]

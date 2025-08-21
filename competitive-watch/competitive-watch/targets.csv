@@ -1,0 +1,15 @@
+competitor,url,field,css_selector
+Sigma Supply,https://www.sigmasupply.com/stretch-film/,product_list,.product-title, 
+Sigma Supply,https://www.sigmasupply.com/tape/,product_list,.product-title,
+Sigma Supply,https://www.sigmasupply.com/news/,headline,.blog-title,
+Sigma Supply,https://www.sigmasupply.com/careers/,job_list,h2,
+
+JM Industrial,https://www.jm-ind.com/packaging/stretch-wrap,product_list,.product-name,
+JM Industrial,https://www.jm-ind.com/packaging/cartons,product_list,.product-name,
+JM Industrial,https://www.jm-ind.com/packaging/tape,product_list,.product-name,
+JM Industrial,https://www.jm-ind.com/news,headline,h2,
+
+Pratt,https://www.prattindustries.com/products/,product_list,.products-block__title,
+Pratt,https://www.prattindustries.com/news/,headline,.post-title,
+Pratt,https://www.prattindustries.com/sustainability/,claim,h2,
+Pratt,https://www.prattindustries.com/careers/,job_list,h3

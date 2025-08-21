@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Competitive Watch — JohnPac</title>
+  <style>
+    :root { --bg:#0b0c0f; --card:#12151a; --muted:#9098a6; --text:#e6e9ee; --accent:#4da3ff; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    header { padding:24px; border-bottom:1px solid #1e232b; display:flex; align-items:center; gap:12px;}
+    header h1 { font-size:20px; margin:0; }
+    header .sub { color:var(--muted); font-size:14px; }
+    main { padding:24px; display:grid; gap:16px; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; }
+    .card { background:var(--card); border:1px solid #1e232b; border-radius:16px; padding:16px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding:10px 12px; border-bottom:1px solid #1e232b; vertical-align: top; }
+    th { text-align:left; color:#b5becc; font-weight:600; font-size:12px; letter-spacing:.04em; text-transform: uppercase; }
+    tr:hover td { background:#0f1319; }
+    a { color: var(--accent); text-decoration: none; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; background:#1b2330; color:#cdd6e4; font-size:12px; }
+    input, select { background:#0f1319; color:#e6e9ee; border:1px solid #1e232b; border-radius:10px; padding:8px 10px; }
+    .muted { color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
+    .nowrap { white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Competitive Watch</h1>
+    <div class="sub">Sigma Supply · JM Industrial · Pratt Industries</div>
+  </header>
+  <main>
+    <div class="controls card">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <select id="filterCompetitor" aria-label="Filter by competitor">
+          <option value="">All competitors</option>
+        </select>
+        <select id="filterField" aria-label="Filter by field">
+          <option value="">All fields</option>
+        </select>
+        <input id="search" placeholder="Search text…" />
+      </div>
+      <div class="muted" style="margin-top:8px;">Showing latest changes from <span id="count">0</span> entries. Data updates nightly.</div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th class="nowrap">Date</th>
+            <th>Competitor</th>
+            <th>Field</th>
+            <th>URL</th>
+            <th>Before → After</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const state = { rows: [], filtered: [] };
+
+    function renderOptions() {
+      const compSet = new Set(state.rows.map(r => r.competitor));
+      const fieldSet = new Set(state.rows.map(r => r.field));
+      const compSel = document.getElementById('filterCompetitor');
+      const fieldSel = document.getElementById('filterField');
+      for (const v of [...compSet].sort()) { const o=document.createElement('option'); o.value=v; o.textContent=v; compSel.appendChild(o); }
+      for (const v of [...fieldSet].sort()) { const o=document.createElement('option'); o.value=v; o.textContent=v; fieldSel.appendChild(o); }
+    }
+
+    function rowHTML(r) {
+      const dt = new Date(r.ts * 1000).toLocaleString();
+      const before = (r.old || '—').toString().slice(0, 400);
+      const after = (r.new || '—').toString().slice(0, 400);
+      return `<tr>
+        <td class="nowrap"><span class="mono">${dt}</span></td>
+        <td><span class="pill">${r.competitor}</span></td>
+        <td>${r.field}</td>
+        <td class="mono"><a href="${r.url}" target="_blank" rel="noopener">Open</a></td>
+        <td>
+          <div><strong>Old:</strong> ${before}</div>
+          <div><strong>New:</strong> ${after}</div>
+        </td>
+      </tr>`;
+    }
+
+    function applyFilters() {
+      const c = document.getElementById('filterCompetitor').value;
+      const f = document.getElementById('filterField').value;
+      const q = document.getElementById('search').value.toLowerCase().trim();
+      state.filtered = state.rows.filter(r => {
+        if (c && r.competitor !== c) return false;
+        if (f && r.field !== f) return false;
+        if (!q) return true;
+        return (r.old || '').toLowerCase().includes(q) || (r.new || '').toLowerCase().includes(q);
+      });
+      document.getElementById('count').textContent = state.filtered.length;
+      const tbody = document.getElementById('rows');
+      tbody.innerHTML = state.filtered.map(rowHTML).join("");
+    }
+
+    async function boot() {
+      try {
+        const res = await fetch('data/changes.json', { cache: 'no-store' });
+        const data = await res.json();
+        state.rows = data;
+      } catch (e) {
+        state.rows = [];
+      }
+      renderOptions();
+      applyFilters();
+      document.getElementById('filterCompetitor').addEventListener('change', applyFilters);
+      document.getElementById('filterField').addEventListener('change', applyFilters);
+      document.getElementById('search').addEventListener('input', applyFilters);
+    }
+    boot();
+  </script>
+</body>
+</html>
